@@ -13,6 +13,9 @@ Resources:
       MemorySize: 3008
       Timeout: 30
       Tracing: Active
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Linear10PercentEvery10Minutes
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:887080169480:layer:php73:3
       Events:
