@@ -1,6 +1,14 @@
 # Description
 Running PHP inside Lambda layers using [stackery php-lambda-layer](https://github.com/stackery/php-lambda-layer)
 
+![alt text](screenshot.png)
+
+# Key Aspects
+- Leverage Lambda Layers for the PHP custom runtime
+- Set the Lambda handler as **index.php**
+- Use AWS Serverless Application Model (SAM) to package and deploy your HTTP application
+- Use an external API definition tool, such as Swagger, to scaffold client and server contracts. This shortens development time by generating client side and server side communication components, thus allowing you to write only the functionallity not the communication mechanisms. See [Swagger Codegen](https://swagger.io/tools/swagger-codegen/)
+
 # Files
 |file|description|
 |-|-|
