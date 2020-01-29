@@ -7,6 +7,7 @@ Running PHP inside Lambda layers using [stackery php-lambda-layer](https://githu
 |src/index.php| Main file handler|
 |src/json-response.php| Sets JSON header and encodes response data object|
 |src/php.ini|Includes json.so to encode json response |
+|template.yaml|SAM CloudFormation template which includes PHP Lambda Layer|
 
 # Included Extensions
 The following extensions are built into the layer:
@@ -75,6 +76,9 @@ Resources:
       MemorySize: 3008
       Timeout: 30
       Tracing: Active
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Linear10PercentEvery10Minutes
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:887080169480:layer:php73:3
       Events:
@@ -100,3 +104,52 @@ $response = [ 'context' => 'custom-runtime-example', 'age' => $data ];
 send_json_response($response);
 ?>
 ```
+
+# Deplying
+Run the following commands:
+
+```sh
+$ sam package \
+    --template-file template.yaml \
+    --output-template-file serverless-output.yaml \
+    --s3-bucket <your SAM deployment bucket created above>
+
+# Deploying directly using SAM. Recommendation is to use a CI/CD like AWS CodePipeline
+$ sam deploy \
+    --template-file serverless-output.yaml \
+    --stack-name my-first-serverless-php-service \
+    --capabilities CAPABILITY_IAM
+```
+
+## Packaging using AWS CodeBuild
+
+Use the following in your `buildspec.yaml`
+```yaml
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+       python: 3.7
+    commands:
+      - pip install cfn-lint
+  build:
+    commands:
+      - cfn-lint -t template.yaml
+      - aws cloudformation package --template-file template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged-template.yaml
+artifacts:
+  files:
+    - packaged-template.yaml
+```
+
+### Deploying using CodeDeploy
+Copy and modify the `template.yaml` from https://github.com/awslabs/aws-sam-codepipeline-cd/blob/master/sam/app/template.yaml
+
+
+# Additional Resources
+- [AWS Lambda Custom Runtime for PHP: A Practical Example](
+https://aws.amazon.com/blogs/apn/aws-lambda-custom-runtime-for-php-a-practical-example/)
+- [Using AWS Lambda Layers for PHP](https://codingwar.com/using-aws-lambda-layers-php)
+- [Bref Lambda Layers](https://bref.sh/docs/environment/php.html)
+- [Safe Lambda deployments
+](https://github.com/awslabs/serverless-application-model/blob/master/docs/safe_lambda_deployments.rst)
